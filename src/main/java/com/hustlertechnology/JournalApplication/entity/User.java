@@ -1,5 +1,6 @@
 package com.hustlertechnology.JournalApplication.entity;
 
+import lombok.Data;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
@@ -15,19 +16,18 @@ import java.util.List;
 
 // This is POJO Class plain object java class
 @Document(collection = "users")
-@Getter
-@Setter
+@Data
 public class User {
     @Id
     private ObjectId id;
-    @Indexed(unique = true)
+    @Indexed(unique = true) // to make username unique
     @NonNull
     private String userName;
     @NonNull
     private String password;
 
-    @DBRef
-    private List<JournalEntry> journalEntryList = new ArrayList<>();
+    @DBRef // parent child relationship created this journal stored the reference of it and attached to users
+    private List<JournalEntry> journalEntries = new ArrayList<>();
 
 
 }
