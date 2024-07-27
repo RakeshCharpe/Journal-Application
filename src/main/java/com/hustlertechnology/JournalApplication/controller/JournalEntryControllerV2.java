@@ -2,7 +2,9 @@ package com.hustlertechnology.JournalApplication.controller;
 
 
 import com.hustlertechnology.JournalApplication.entity.JournalEntry;
+import com.hustlertechnology.JournalApplication.entity.User;
 import com.hustlertechnology.JournalApplication.service.JournalEntryService;
+import com.hustlertechnology.JournalApplication.service.UserService;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,12 +19,16 @@ import java.util.*;
 public class JournalEntryControllerV2 {
 
     @Autowired
-    JournalEntryService journalEntryService;
+    private JournalEntryService journalEntryService;
+
+    @Autowired
+    private UserService userService;
 
 
-    @GetMapping
-    public ResponseEntity<?> getAll() { //localhost:8080/journal
-        List<JournalEntry> all = journalEntryService.getEntryList();
+    @GetMapping("{userName}")
+    public ResponseEntity<?> getAllJournalEnteriesOfUser(@PathVariable String userName) { //localhost:8080/journal
+        User user = userService.findByUserName(userName);
+        List<JournalEntry> all = user.getJournalEntries();
         if(all!=null && !all.isEmpty()){
             return new ResponseEntity<>(all,HttpStatus.OK);
         }else{
@@ -42,12 +48,14 @@ public class JournalEntryControllerV2 {
 
     }
 
-    @PostMapping
-    public ResponseEntity<JournalEntry> createEntry(@RequestBody JournalEntry EntryData) {
+    @PostMapping("{userName}")
+    public ResponseEntity<JournalEntry> createEntry(@RequestBody JournalEntry EntryData , @PathVariable String userName) {
         //localhost:8080/journal Journal Entry ka hi object pass kiya tha isliye yaha usi ko liya and add kar rahe hai
         try {
+
             EntryData.setDate(LocalDateTime.now());
-            journalEntryService.saveEntry(EntryData);
+            journalEntryService.saveEntry(EntryData , userName);
+
             return new ResponseEntity<>(HttpStatus.CREATED);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -56,29 +64,24 @@ public class JournalEntryControllerV2 {
 
     }
 
-    @DeleteMapping("id/{gettingId}")
-    public ResponseEntity<?> deleteJournalById(@PathVariable ObjectId gettingId) {
+    @DeleteMapping("id/{userName}/{gettingId}")
+    public ResponseEntity<?> deleteJournalById(@PathVariable ObjectId gettingId,@PathVariable String userName) {
 
-        Optional<JournalEntry> journalEntry = journalEntryService.getById(gettingId);
+//        Optional<JournalEntry> journalEntry = journalEntryService.getById(gettingId);
 
-        if (journalEntry.isPresent()) {
-            journalEntryService.deleteEntry(gettingId);
+            journalEntryService.deleteEntry(gettingId , userName);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } else {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-
 
     }
 
-    @PutMapping("id/{myId}")
-    public ResponseEntity<?> updateJournalById(@PathVariable ObjectId myId, @RequestBody JournalEntry dataToUpdate) {
+    @PutMapping("id/{userName}/{myId}")
+    public ResponseEntity<?> updateJournalById(@PathVariable ObjectId myId, @RequestBody JournalEntry dataToUpdate,@PathVariable String userName) {
 
         JournalEntry oldEntry = journalEntryService.getById(myId).orElse(null);
         if (oldEntry != null) {
             oldEntry.setTitle(dataToUpdate.getTitle());
             oldEntry.setContent(dataToUpdate.getContent());
-            journalEntryService.saveEntry(oldEntry);
+           journalEntryService.saveEntry(oldEntry);
             return new ResponseEntity<>(HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);

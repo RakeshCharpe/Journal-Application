@@ -1,6 +1,7 @@
 package com.hustlertechnology.JournalApplication.controller;
 
 
+import com.hustlertechnology.JournalApplication.entity.JournalEntry;
 import com.hustlertechnology.JournalApplication.entity.User;
 import com.hustlertechnology.JournalApplication.service.UserService;
 import org.bson.types.ObjectId;
@@ -36,6 +37,19 @@ public class UserController {
     private ResponseEntity<?> deleteUserById(@PathVariable ObjectId id){
         userService.deleteEntry(id);
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PutMapping("/{userName}")
+    private ResponseEntity<?> updateUser(@RequestBody User user, @PathVariable String userName){
+        User userInDb = userService.findByUserName(userName);
+        if(userInDb != null){
+           userInDb.setUserName(user.getUserName());
+           userInDb.setPassword(user.getPassword());
+           userService.saveEntry(userInDb);
+           return new ResponseEntity<>(HttpStatus.OK);
+        }else{
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 
 }
