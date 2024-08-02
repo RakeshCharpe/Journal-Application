@@ -25,6 +25,7 @@ public class User {
     private String userName;
     @NonNull
     private String password;
+    private List<String> roles;
 
     @DBRef // parent child relationship created this journal stored the reference of it and attached to users
     private List<JournalEntry> journalEntries = new ArrayList<>();

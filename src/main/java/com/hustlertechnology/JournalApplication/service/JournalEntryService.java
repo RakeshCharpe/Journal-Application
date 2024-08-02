@@ -6,6 +6,7 @@ import com.hustlertechnology.JournalApplication.repository.JournalEntryRepositor
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -20,11 +21,19 @@ public class JournalEntryService {
     @Autowired
     private UserService userService;
 
+    @Transactional
     public void saveEntry(JournalEntry journalEntry, String userName){
-        User user = userService.findByUserName(userName);
-        JournalEntry saved = journalEntryRepository.save(journalEntry);
-        user.getJournalEntries().add(saved);
-        userService.saveEntry(user);
+
+        try{
+            User user = userService.findByUserName(userName);
+            JournalEntry saved = journalEntryRepository.save(journalEntry);
+            user.getJournalEntries().add(saved);
+            userService.saveEntry(user);
+        }catch(Exception e){
+            System.out.println(e.getMessage());
+            throw new RuntimeException("An error occured while saving the entry" , e);
+        }
+
     }
     public void saveEntry(JournalEntry journalEntry){
 
