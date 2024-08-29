@@ -9,6 +9,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 public interface UserRepository extends MongoRepository<User, ObjectId> {
 
         User findByUserName(String username);
-        User deleteByUserName(String username);
+        void deleteByUserName(String username);
 
 }

@@ -18,34 +18,47 @@ import java.util.Optional;
 @Component
 public class UserService {
 
-
     @Autowired
     private UserRepository userRepository;
 
     private static final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-    public void saveEntry( User user){
-        userRepository.save(user);
+    public boolean saveNewUser(User user) {
+        try {
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
+            user.setRoles(Arrays.asList("USER"));
+            userRepository.save(user);
+            return true;
+        } catch (Exception e) {
+
+            return false;
+        }
     }
-    public void saveNewUser( User user){
-        user.setRoles(Arrays.asList("USER"));
+
+    public void saveAdmin(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setRoles(Arrays.asList("USER", "ADMIN"));
         userRepository.save(user);
     }
-    public List<User> getEntryList(){
+
+    public void saveUser(User user) {
+        userRepository.save(user);
+    }
+
+    public List<User> getAll() {
         return userRepository.findAll();
     }
-    public Optional<User> getById(ObjectId givenId){
-        return userRepository.findById(givenId);
+
+    public Optional<User> findById(ObjectId id) {
+        return userRepository.findById(id);
     }
 
-    public boolean deleteEntry(ObjectId Id){
-        userRepository.deleteById(Id);
-        return true;
+    public void deleteById(ObjectId id) {
+        userRepository.deleteById(id);
     }
-    public User findByUserName(String userName){
+
+    public User findByUserName(String userName) {
         return userRepository.findByUserName(userName);
     }
-
 
 }
